@@ -10,6 +10,7 @@ class ProcessMonitor:
         self._name = name
         self._args = args 
         self._cwd = cwd
+        
         self._proc = Popen(args, cwd=cwd)
         self._info = psutil.Process(self._proc.pid)
 
@@ -29,7 +30,7 @@ class ProcessMonitor:
     def register_host(self, host: Queue):
         self._host_queue = host
 
-    def _fire_event(self, process_monitor, return_code):
+    def _fire_event(self, process_monitor: 'ProcessMonitor', return_code: int):
         if self._host_queue is not None:
             self._host_queue.put({  'process_monitor': process_monitor,
                                     'return_code': return_code })
