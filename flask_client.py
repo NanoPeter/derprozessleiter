@@ -1,4 +1,4 @@
-from flask import Flask , Response
+from flask import Flask , jsonify
 from xmlrpc.client import ServerProxy
 import json
 
@@ -10,7 +10,15 @@ app = Flask(__name__, static_folder='./static/', static_url_path='/static')
 def list():
     with ServerProxy(url) as proxy:
         processes = proxy.list_processes()
-    return Response(json.dumps(processes), 200, content_type='application/json')
+
+    return jsonify(processes)
+
+@app.route('/process/<string:name>', methods=['GET'])
+def process_metrics(name):
+    with ServerProxy(url) as proxy:
+        process_metrics = proxy.get_metrics(name)
+
+    return jsonify(process_metrics)
 
 @app.route('/', methods=['GET'])
 def index():

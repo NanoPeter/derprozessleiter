@@ -100,6 +100,10 @@ class ProcessMonitor:
     def last_start_timestamp(self):
         return self._start_timestamp
 
+    @property
+    def uptime(self):
+        return datetime.now() - self._start_timestamp
+
     def to_dict(self):
         return dict(name=self.name,
                     cpu=self.cpu,
@@ -108,5 +112,6 @@ class ProcessMonitor:
                     cwd=self.current_working_directory,
                     args=self.args,
                     pid=self.pid,
-                    started=self._start_timestamp.isoformat())
+                    started=self._start_timestamp.isoformat(),
+                    uptime=str(self.uptime))
 
