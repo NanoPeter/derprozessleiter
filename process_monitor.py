@@ -113,5 +113,6 @@ class ProcessMonitor:
                     args=self.args,
                     pid=self.pid,
                     started=self._start_timestamp.isoformat(),
-                    uptime=str(self.uptime))
+                    uptime=str(self.uptime),
+                    number_of_starts=self.number_of_starts)
 

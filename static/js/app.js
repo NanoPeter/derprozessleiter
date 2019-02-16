@@ -1,17 +1,28 @@
 var vm = new Vue({
     el: '#process_overview',
-    data: function() { 
+    data: function() {
         return {
-            processes = []
+            processes: {},
         }
     },
     mounted: function(){
         var self = this;
-        console.log(self);
+
+        update_process = function(name){
+            $.get('/process/'+name, function(data){
+                Vue.set(self.processes, name, data);
+            }, 'json');
+        };
 
         $.get('/list', function(data){
-            self.processes = data;
-            console.log(self.processes);
+            for (i = 0; i < data.length; i++){
+                var name = data[i];
+                console.log(name)
+                Vue.set(self.processes, name, {'name': name})
+
+                setInterval(update_process, 1000, name);
+            }
+            console.log(self);
         }, 'json');
     }
 })
