@@ -20,6 +20,27 @@ def process_metrics(name):
 
     return jsonify(process_metrics)
 
+@app.route('/process/<string:name>/stop', methods=['GET'])
+def process_stop(name):
+    with ServerProxy(url) as proxy:
+        proxy.terminate(name)
+
+    return jsonify('okay')
+
+@app.route('/process/<string:name>/restart', methods=['GET'])
+def process_restart(name):
+    with ServerProxy(url) as proxy:
+        proxy.restart_process(name)
+
+    return jsonify('okay')
+
+@app.route('/process/<string:name>/start', methods=['GET'])
+def process_start(name):
+    with ServerProxy(url) as proxy:
+        proxy.start_process(name)
+
+    return jsonify('okay')
+
 @app.route('/', methods=['GET'])
 def index():
     return app.send_static_file('index.html')

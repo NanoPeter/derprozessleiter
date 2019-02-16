@@ -1,6 +1,6 @@
 import psutil
-from subprocess import Popen
-from threading import Thread
+from subprocess import Popen, TimeoutExpired, PIPE
+from threading import Thread, Event
 from queue import Queue
 
 from datetime import datetime
@@ -14,25 +14,54 @@ class ProcessMonitor:
         self._cwd = cwd
 
         self._number_of_starts = 0
+
+        self._should_stop = Event()
         
         self._start(args, cwd)
 
         self._host_queue = host_queue
 
     def _monitor_process(self):
-        return_value = self._proc.wait()
-        self._fire_event(self, return_value)
+        while not self._should_stop.is_set():
+            return_value = self._proc.poll()
+            if return_value is None:
+                try:
+                    #stdout, stderr = self._proc.communicate(timeout=1)
+                    print('DEBUG', self._name, self._proc.stdout.readline())
+                    print('ERROR', self._name, self._proc.stderr.readline())
+                except TimeoutExpired:
+                    pass
+            else:
+                self._fire_event(self, return_value)
+                self._should_stop.set()
+
 
     def kill(self):
         self._proc.kill()
+        self._proc.wait()
+        self._should_stop.set()
+
+    def terminate(self):
+        self._proc.terminate()
+        self._should_stop.set()
+
+    def wait(self, timeout:int):
+        try:
+            self._proc.wait(timeout=timeout)
+        except TimeoutExpired:
+            return False 
+        
+        return True
 
     def _fire_event(self, process_monitor: 'ProcessMonitor', return_code: int):
         self._host_queue.put({  'process_monitor': process_monitor,
                                 'return_code': return_code })
 
     def _start(self, args: List[str], cwd: str):
-        self._proc = Popen(args, cwd=cwd)
+        self._proc = Popen(args, cwd=cwd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         self._info = psutil.Process(self._proc.pid)
+
+        self._should_stop.clear()
 
         self._thread = Thread(target=self._monitor_process)
         self._thread.start()
@@ -40,10 +69,19 @@ class ProcessMonitor:
         self._number_of_starts += 1
         self._start_timestamp = datetime.now()
 
-    def restart(self):
+    def restart_gracefully(self):
+        if self.running:
+            self.terminate()
+            try:
+                self._proc.wait(timeout=10)
+            except TimeoutExpired:
+                self.kill()
+            
+        self.start()
+
+    def restart(self, wait = 0):
         if self.running:
             self.kill()
-        
         self.start()
 
     def start(self):
@@ -113,6 +151,6 @@ class ProcessMonitor:
                     args=self.args,
                     pid=self.pid,
                     started=self._start_timestamp.isoformat(),
-                    uptime=str(self.uptime),
+                    uptime=str(self.uptime).split('.')[0],
                     number_of_starts=self.number_of_starts)
 

@@ -4,18 +4,32 @@
             Service Overview
         </title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="/static/css/app.css">
     </head>
     <body>
-        <h1>Services</h1>
-        <div id='process_overview'>
-            <div v-for="(process, name) in processes">
-                <h3>{{ process.name }}</h3>
-                <div>{{ process.cpu }} %</div>
-                <div>{{ process.memory[0] }} {{ process.memory[1]}}B</div>
-                <div>{{ process.uptime }}</div>
-                <div>{{ process.number_of_starts }} starts</div>
+        <nav class="navbar navbar-light bg-light fixed-top">
+            <span class="navbar-brand mb-0 h1">Service</span>
+        </nav>
+        <main role="main" class="container">
+            <div id='process_overview' class="row">
+                <div v-for="(process, name) in processes" class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ process.name }}</h5>
+                            <div class="card-text">{{ process.cpu }} %</div>
+                            <div class="card-text">{{ process.memory[0] }} {{ process.memory[1]}}B</div>
+                            <div class="card-text">{{ process.uptime }}</div>
+                            <div class="card-text">{{ process.number_of_starts }} starts</div>
+                            <div class="btn-group" role="group" aria-label="command">
+                                <button class="btn btn-success" type="button" v-on:click="stop(process.name)">start</button>
+                                <button class="btn btn-danger" type="button" v-on:click="stop(process.name)">stop</button>
+                                <button class="btn btn-warning" type="button" v-on:click="restart(process.name)">restart</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </body>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

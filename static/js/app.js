@@ -5,6 +5,17 @@ var vm = new Vue({
             processes: {},
         }
     },
+    methods: {
+        stop: function(name){
+            $.get('/process/'+name+'/stop')
+        },
+        restart: function(name){
+            $.get('/process/'+name+'/restart')
+        },
+        start: function(name){
+            $.get('/process/'+name+'/start')
+        }
+    },
     mounted: function(){
         var self = this;
 
